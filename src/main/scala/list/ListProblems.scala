@@ -4,10 +4,8 @@ package list
 
 object ListProblems extends App {
 
-  val list = RList from (1 to 100)
+  val list = 1 :: 2 :: 3 :: 4 :: 5 :: 6 :: 7 :: RNil
 
-  val list2 = 1 :: 2 :: 3 :: 1 :: 3 :: 4 :: 2 :: 2 :: RNil
-
-  println(list.duplicateEach(3))
+  println(list rotate 8)
 
 }
