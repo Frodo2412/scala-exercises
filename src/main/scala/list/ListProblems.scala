@@ -6,6 +6,6 @@ object ListProblems extends App {
 
   val list = 1 :: 2 :: 3 :: RNil
 
-  println(list rotate 4)
+  println(list sample 3)
 
 }

@@ -2,6 +2,7 @@ package me.brunolemus.interview
 package list
 
 import scala.annotation.{tailrec, unused}
+import scala.util.Random
 
 
 sealed abstract class RList[+T] {
@@ -38,6 +39,8 @@ sealed abstract class RList[+T] {
 
   def rotate(positions: Int): RList[T]
 
+  def sample(k: Int): RList[T]
+
 }
 
 case object RNil extends RList[Nothing] {
@@ -71,6 +74,8 @@ case object RNil extends RList[Nothing] {
   override def duplicateEach(times: Int): RList[Nothing] = RNil
 
   override def rotate(positions: Int): RList[Nothing] = RNil
+
+  override def sample(k: Int): RList[Nothing] = RNil
 }
 
 case class ::[+T](override val head: T, override val tail: RList[T]) extends RList[T] {
@@ -243,6 +248,23 @@ case class ::[+T](override val head: T, override val tail: RList[T]) extends RLi
     }
 
     rotateTailRec(this, positions % length, RNil)
+  }
+
+  override def sample(k: Int): RList[T] = {
+    val random = new Random(System.currentTimeMillis())
+    val maxIndex = length
+
+    @tailrec
+    def sampleTailrec(amountSampled: Int, sampled: RList[T]): RList[T] =
+      if (amountSampled == k) sampled
+      else sampleTailrec(amountSampled + 1, this(random.between(0, maxIndex)) :: sampled)
+
+    @unused
+    def elegantSample: RList[T] = RList from (1 to k).map(_ => random.nextInt(maxIndex)).map(apply)
+
+    if (k < 0) RNil
+    else sampleTailrec(0, RNil)
+
   }
 }
 
