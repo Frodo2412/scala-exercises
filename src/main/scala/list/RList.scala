@@ -164,13 +164,26 @@ case class ::[+T](override val head: T, override val tail: RList[T]) extends RLi
 
   override def flatMap[S](f: T => RList[S]): RList[S] = {
     @tailrec
-    def flatMapTailRec(accum: RList[S], remaining: RList[T]): RList[S] =
+    @unused
+    def inefficientFlatMapTailRec(accum: RList[S], remaining: RList[T]): RList[S] =
       remaining match {
         case RNil => accum.reverse
-        case head :: tail => flatMapTailRec(f(head).reverse ++ accum, tail)
+        case head :: tail => inefficientFlatMapTailRec(f(head).reverse ++ accum, tail)
       }
 
-    flatMapTailRec(RNil, this)
+    @tailrec
+    def concatenateAll(remaining: RList[RList[S]], currentList: RList[S], accumulated: RList[S]): RList[S] = (currentList, remaining) match {
+      case (RNil, RNil) => accumulated
+      case (RNil, head :: tail) => concatenateAll(tail, head, accumulated)
+      case (head :: tail, _) => concatenateAll(remaining, tail, head :: accumulated)
+    }
+
+    def betterFlatMap(remaining: RList[T], accumulated: RList[RList[S]]): RList[S] = remaining match {
+      case RNil => concatenateAll(accumulated, RNil, RNil)
+      case head :: tail => betterFlatMap(tail, f(head).reverse :: accumulated)
+    }
+
+    betterFlatMap(this, RNil)
   }
 
   override def filter(f: T => Boolean): RList[T] = {
@@ -257,7 +270,7 @@ case class ::[+T](override val head: T, override val tail: RList[T]) extends RLi
     @tailrec
     def sampleTailrec(amountSampled: Int, sampled: RList[T]): RList[T] =
       if (amountSampled == k) sampled
-      else sampleTailrec(amountSampled + 1, this(random.between(0, maxIndex)) :: sampled)
+      else sampleTailrec(amountSampled + 1, this (random.between(0, maxIndex)) :: sampled)
 
     @unused
     def elegantSample: RList[T] = RList from (1 to k).map(_ => random.nextInt(maxIndex)).map(apply)
