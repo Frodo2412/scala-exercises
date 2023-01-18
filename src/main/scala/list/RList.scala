@@ -229,11 +229,20 @@ case class ::[+T](override val head: T, override val tail: RList[T]) extends RLi
     @tailrec
     def rotateTailRec(remaining: RList[T], moved: Int, accumulated: RList[T]): RList[T] = remaining match {
       case RNil => accumulated
-      case _ :: _ if moved == 0 => accumulated ++ remaining.reverse
+      case _ :: _ if moved == 0 => remaining ++ accumulated.reverse
       case head :: tail => rotateTailRec(tail, moved - 1, head :: accumulated)
     }
 
-    rotateTailRec(this.reverse, positions % length, RNil)
+    @tailrec
+    @unused
+    def rotateTailrec_v2(remaining: RList[T], rotationsLeft: Int, buffer: RList[T]): RList[T] = {
+      if (remaining.isEmpty && rotationsLeft == 0) this
+      else if (remaining.isEmpty) rotateTailrec_v2(this, rotationsLeft, buffer)
+      else if (rotationsLeft == 0) remaining ++ buffer.reverse
+      else rotateTailrec_v2(remaining.tail, rotationsLeft, head :: buffer)
+    }
+
+    rotateTailRec(this, positions % length, RNil)
   }
 }
 

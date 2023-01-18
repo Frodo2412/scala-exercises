@@ -4,8 +4,8 @@ package list
 
 object ListProblems extends App {
 
-  val list = 1 :: 2 :: 3 :: 4 :: 5 :: 6 :: 7 :: RNil
+  val list = 1 :: 2 :: 3 :: RNil
 
-  println(list rotate 8)
+  println(list rotate 4)
 
 }
