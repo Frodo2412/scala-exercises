@@ -41,6 +41,9 @@ sealed abstract class RList[+T] {
 
   def sample(k: Int): RList[T]
 
+  // Hard Exercises
+  def sort[S >: T](implicit ordering: Ordering[S]): RList[S]
+
 }
 
 case object RNil extends RList[Nothing] {
@@ -76,6 +79,8 @@ case object RNil extends RList[Nothing] {
   override def rotate(positions: Int): RList[Nothing] = RNil
 
   override def sample(k: Int): RList[Nothing] = RNil
+
+  override def sort[S >: Nothing](implicit ordering: Ordering[S]): RList[S] = RNil
 }
 
 case class ::[+T](override val head: T, override val tail: RList[T]) extends RList[T] {
@@ -178,6 +183,8 @@ case class ::[+T](override val head: T, override val tail: RList[T]) extends RLi
       case (head :: tail, _) => concatenateAll(remaining, tail, head :: accumulated)
     }
 
+    // Medium Exercise
+    @tailrec
     def betterFlatMap(remaining: RList[T], accumulated: RList[RList[S]]): RList[S] = remaining match {
       case RNil => concatenateAll(accumulated, RNil, RNil)
       case head :: tail => betterFlatMap(tail, f(head).reverse :: accumulated)
@@ -279,6 +286,9 @@ case class ::[+T](override val head: T, override val tail: RList[T]) extends RLi
     else sampleTailrec(0, RNil)
 
   }
+
+  override def sort[S >: T](implicit ordering: Ordering[S]): RList[S] = ???
+
 }
 
 object RList {

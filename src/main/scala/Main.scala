@@ -1,7 +1,9 @@
 package me.brunolemus.interview
 
+import scala.collection.immutable.HashMap
+
+
 object Main {
-  def main(args: Array[String]): Unit = {
-    println("Hello world!")
-  }
+
+
 }
