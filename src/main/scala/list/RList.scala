@@ -287,7 +287,23 @@ case class ::[+T](override val head: T, override val tail: RList[T]) extends RLi
 
   }
 
-  override def sort[S >: T](implicit ordering: Ordering[S]): RList[S] = ???
+  override def sort[S >: T](implicit ordering: Ordering[S]): RList[S] = {
+
+    @tailrec
+    def insertSort(element: S, before: RList[S], after: RList[S] = RNil): RList[S] = before.reverse match {
+      case RNil => element :: after
+      case head :: tail if ordering.lt(element, head) => insertSort(element, tail.reverse, head :: after)
+      case _ :: _ => before ++ (element :: after)
+    }
+
+    @tailrec
+    def sortTailrec(remaining: RList[S], sorted: RList[S]): RList[S] = remaining match {
+      case RNil => sorted
+      case head :: tail => sortTailrec(tail, insertSort(head, sorted))
+    }
+
+    sortTailrec(this, RNil)
+  }
 
 }
 

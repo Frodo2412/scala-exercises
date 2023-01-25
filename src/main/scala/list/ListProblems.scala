@@ -4,9 +4,9 @@ package list
 
 object ListProblems extends App {
 
-  val list = 1 :: 2 :: 3 :: RNil
+  private val unsortedList = 4 :: 6 :: 8 :: 1 :: 3 :: 2 :: 5 :: 7 :: 9 :: 10 :: RNil
 
-  println(list sample 3)
-  println(list.sort)
+  println(unsortedList)
+  println(unsortedList.sort)
 
 }

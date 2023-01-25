@@ -8,12 +8,10 @@ object DisneyProblems {
 
   private def isPalindrome(word: String): Boolean = {
     @tailrec
-    def isPalindromeRec(startIndex: Int, endIndex: Int): Boolean = {
-      if (startIndex == endIndex) true
-      else if (startIndex > endIndex) true
+    def isPalindromeRec(startIndex: Int, endIndex: Int): Boolean =
+      if (startIndex >= endIndex) true
       else if (word.charAt(startIndex) == word.charAt(endIndex)) isPalindromeRec(startIndex + 1, endIndex - 1)
       else false
-    }
 
     isPalindromeRec(0, word.length - 1)
   }
