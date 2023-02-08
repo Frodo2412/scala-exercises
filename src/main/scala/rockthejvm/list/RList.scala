@@ -1,5 +1,5 @@
 package me.brunolemus.interview
-package list
+package rockthejvm.list
 
 import scala.annotation.{tailrec, unused}
 import scala.util.Random
@@ -42,7 +42,9 @@ sealed abstract class RList[+T] {
   def sample(k: Int): RList[T]
 
   // Hard Exercises
-  def sort[S >: T](implicit ordering: Ordering[S]): RList[S]
+  def insertSort[S >: T](implicit ordering: Ordering[S]): RList[S]
+
+  def mergeSort[S >: T](implicit ordering: Ordering[S]): RList[S]
 
 }
 
@@ -80,7 +82,10 @@ case object RNil extends RList[Nothing] {
 
   override def sample(k: Int): RList[Nothing] = RNil
 
-  override def sort[S >: Nothing](implicit ordering: Ordering[S]): RList[S] = RNil
+  override def insertSort[S >: Nothing](implicit ordering: Ordering[S]): RList[S] = RNil
+
+  override def mergeSort[S >: Nothing](implicit ordering: Ordering[S]): RList[S] = RNil
+
 }
 
 case class ::[+T](override val head: T, override val tail: RList[T]) extends RList[T] {
@@ -287,22 +292,54 @@ case class ::[+T](override val head: T, override val tail: RList[T]) extends RLi
 
   }
 
-  override def sort[S >: T](implicit ordering: Ordering[S]): RList[S] = {
+  override def insertSort[S >: T](implicit ordering: Ordering[S]): RList[S] = {
 
     @tailrec
-    def insertSort(element: S, before: RList[S], after: RList[S] = RNil): RList[S] = before.reverse match {
+    def insertSortTailrec(element: S, before: RList[S], after: RList[S] = RNil): RList[S] = before.reverse match {
       case RNil => element :: after
-      case head :: tail if ordering.lt(element, head) => insertSort(element, tail.reverse, head :: after)
+      case head :: tail if ordering.lt(element, head) => insertSortTailrec(element, tail.reverse, head :: after)
       case _ :: _ => before ++ (element :: after)
     }
 
     @tailrec
     def sortTailrec(remaining: RList[S], sorted: RList[S]): RList[S] = remaining match {
       case RNil => sorted
-      case head :: tail => sortTailrec(tail, insertSort(head, sorted))
+      case head :: tail => sortTailrec(tail, insertSortTailrec(head, sorted))
     }
 
     sortTailrec(this, RNil)
+  }
+
+  override def mergeSort[S >: T](implicit ordering: Ordering[S]): RList[S] = {
+
+    @tailrec
+    def merge(a: RList[S], b: RList[S], acc: RList[S] = RNil): RList[S] = (a, b) match {
+      case (RNil, RNil) => acc
+      case (RNil, b) => acc.reverse ++ b
+      case (a, RNil) => acc.reverse ++ a
+      case (headA :: tailA, headB :: tailB) =>
+        if (ordering.gteq(headA, headB)) merge(a, tailB, headB :: acc)
+        else merge(tailA, b, headA :: acc)
+    }
+
+    @tailrec
+    def mergeSortTailRec(smallLists: RList[RList[S]], bigLists: RList[RList[S]]): RList[S] =
+      smallLists match {
+        case RNil => bigLists match {
+          case RNil => RNil
+          case head :: RNil => head
+          case _ => mergeSortTailRec(bigLists, RNil)
+        }
+        case head :: RNil =>
+          bigLists match {
+            case RNil => head
+            case bigLists => mergeSortTailRec(head :: bigLists, RNil)
+          }
+        case first :: second :: tail => mergeSortTailRec(tail, merge(first, second) :: bigLists)
+      }
+
+    mergeSortTailRec(map(_ :: RNil), RNil)
+
   }
 
 }
